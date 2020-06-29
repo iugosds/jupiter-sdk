@@ -1,10 +1,10 @@
 <?php
 
-class jupiter
+namespace astroselling\Jupiter;
+
+class Index
 {
-
-
-    protected $version = "Jupiter SDK v1.00.01 beta";
+    protected $version = "Jupiter SDK v1.01";
     protected $url = "http://astroselling.local/jupiter/v1/";
     protected $token;
     

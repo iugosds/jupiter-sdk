@@ -11,9 +11,10 @@
             "email": "jorge.craviotto@astroselling.com"
         }
     ],
-    "minimum-stability": "stable",
     "autoload": {
         "psr-4": {"astroselling\\Jupiter\\": "src/"}
     },
-    "require": {}    
+    "require": {
+        "guzzlehttp/guzzle": "^6.3"
+    }    
 }
