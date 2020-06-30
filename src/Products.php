@@ -4,10 +4,10 @@ namespace astroselling\Jupiter;
 
 class Products
 {
-    protected $version = "Jupiter SDK v1.03";
-    protected $url = "http://astroselling.local/jupiter/v1/";
+    protected $version = "Jupiter SDK v1.04";
+    protected $url;
     protected $token;
-    
+
     
     /**
      * Create a new Jupiter API Client with provided API keys
@@ -15,8 +15,9 @@ class Products
      * @param string $apiUserName
      * @param string $apiUserKey
      */
-    public function __construct(string $apiToken = '')
+    public function __construct(string $url = '', string $apiToken = '')
     {
+        $this->url = $url;
         $this->token = $apiToken;
     }
 
@@ -42,24 +43,92 @@ class Products
         return $this->token;
     }
 
+    public function sendRequest($url, $header = '', $content = '', $type = 'POST', $xml = false)  :object
+    {       
+        ini_set('max_execution_time', 3000); 
+        ini_set('memory_limit', '1024M');
+        
+        $result = new \stdClass();
+                
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
 
-    public function  getChannels() :array
+        if($content) {          
+            if(!$xml) {
+                $fields = json_encode($content, JSON_UNESCAPED_UNICODE);
+            }   
+            else {
+                curl_setopt($curl,CURLOPT_POST, count($content));
+                $fields = http_build_query($content);
+            }
+            
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $fields);
+        }
+        
+        curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $type);
+
+        if($xml) {
+            curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+            curl_setopt($curl, CURLOPT_TIMEOUT, 30);
+            curl_setopt($curl, CURLOPT_MAXREDIRS, 10);          
+        }
+
+        if($header) {
+            curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
+        }   
+            
+        $response = curl_exec($curl);
+        $error    = curl_error($curl);
+            
+        if($error || !$response) {     
+            $result = new \stdClass();       
+            $result->error = $error;
+        }
+        else {
+            $curlResponse = json_decode($response);
+            
+            if(!is_object($curlResponse)) {
+                $result->data = (object) $curlResponse;
+            }           
+        }
+
+        // keep http code
+        $result->httpcode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        
+        curl_close($curl);
+
+        return $result;
+    }
+
+    public function getHeader() : array
+    {
+
+        return array(
+                    "Cache-Control: no-cache",
+                    "Content-Type: application/json"
+                    );
+    }
+    
+
+    public function  getChannels() 
     {
         $channels = array();
 
         try {
-            $action  = "channels?api_token=" . $this->getApiToken();
-            $url     = $this->getUrl() . $action; 
+            $action = "channels?api_token=" . $this->getApiToken();
+            $url = $this->getUrl() . $action; 
 
-            $client = new \GuzzleHttp\Client();
-            $response = $client->request('GET', $url);
+            $header = $this->getHeader();
+            $content = array();
+            $channels = $this->sendRequest($url, $header, $content, 'GET');
             
-            if($response->getStatusCode() == 200) {
-                $channels = json_decode($response->getBody());
+            $httpCode = $channels->httpcode ?? 500;       
+            if($httpCode == 200) {
+                $updated = true;
             }
-        } catch (\GuzzleHttp\Exception\ClientException $e) {
-            $response = $e->getResponse();
-            $channels = array("error" => $response->getBody());
+
         } catch (ThrowException $e) {
             $channels = array("error" => $e->getMessage());
         }
@@ -74,8 +143,8 @@ class Products
 
         $channels = $this->getChannels();
 
-        if($channels) {
-            foreach ($channels as $ch) {
+        if(isset($channels->data)) {
+            foreach ($channels->data as $ch) {
                 if($ch->id == $channel) {
                     $exist = true;
                     break;
@@ -96,19 +165,14 @@ class Products
             $id_in_channel = $product->id_in_erp;
             $action = "channels/{$channel}/products?api_token=" . $this->getApiToken();
             $url = $this->getUrl() . $action; 
-
-            $client = new \GuzzleHttp\Client();
-            $response = $client->request('POST', $url, (array)$product);
+            $header = $this->getHeader();
+            $response = $this->sendRequest($url, $header, $product, 'POST');
            
-            $httpCode = $response->getStatusCode();
-
+            $httpCode = $response->httpcode ?? 500;       
             if($httpCode == 200) {
                 $updated = true;
             }
             
-        } catch (\GuzzleHttp\Exception\ClientException $e) {
-            $response = $e->getResponse();
-            $httpCode = $response->getStatusCode();
         } catch (ThrowException $e) {
             echo "error ----->" . $e->getMessage();
         }
@@ -127,19 +191,14 @@ class Products
             $id_in_channel = $product->id_in_erp;
             $action = "channels/{$channel}/products/{$id_in_channel}?api_token=" . $this->getApiToken();
             $url = $this->getUrl() . $action; 
-
-            $client = new \GuzzleHttp\Client();
-            $response = $client->request('PUT', $url, (array)$product);
-           
-            $httpCode = $response->getStatusCode();
-
+            $header = $this->getHeader();
+            $response = $this->sendRequest($url, $header, $product, 'PUT');          
+            
+            $httpCode = $response->httpcode ?? 500;            
             if($httpCode == 200) {
                 $updated = true;
             }
             
-        } catch (\GuzzleHttp\Exception\ClientException $e) {
-            $response = $e->getResponse();
-            $httpCode = $response->getStatusCode();
         } catch (ThrowException $e) {
             echo "error ----->" . $e->getMessage();
         }
