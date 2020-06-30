@@ -2,9 +2,9 @@
 
 namespace astroselling\Jupiter;
 
-class Index
+class Products
 {
-    protected $version = "Jupiter SDK v1.01";
+    protected $version = "Jupiter SDK v1.03";
     protected $url = "http://astroselling.local/jupiter/v1/";
     protected $token;
     
@@ -57,7 +57,9 @@ class Index
             if($response->getStatusCode() == 200) {
                 $channels = json_decode($response->getBody());
             }
-
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
+            $response = $e->getResponse();
+            $channels = array("error" => $response->getBody());
         } catch (ThrowException $e) {
             $channels = array("error" => $e->getMessage());
         }
@@ -104,7 +106,7 @@ class Index
                 $updated = true;
             }
             
-        } catch (GuzzleHttp\Exception\ClientException $e) {
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
             $response = $e->getResponse();
             $httpCode = $response->getStatusCode();
         } catch (ThrowException $e) {
@@ -135,7 +137,7 @@ class Index
                 $updated = true;
             }
             
-        } catch (GuzzleHttp\Exception\ClientException $e) {
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
             $response = $e->getResponse();
             $httpCode = $response->getStatusCode();
         } catch (ThrowException $e) {
