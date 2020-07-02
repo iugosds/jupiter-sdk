@@ -4,7 +4,7 @@ namespace astroselling\Jupiter;
 
 class Products
 {
-    protected $version = "Jupiter SDK v1.04";
+    protected $version = "Jupiter SDK v1.05";
     protected $url;
     protected $token;
 
@@ -88,10 +88,13 @@ class Products
         }
         else {
             $curlResponse = json_decode($response);
-            
+            //print_r($curlResponse);
             if(!is_object($curlResponse)) {
                 $result->data = (object) $curlResponse;
-            }           
+            }         
+            else {
+                $result = $curlResponse;
+            }  
         }
 
         // keep http code
@@ -211,4 +214,28 @@ class Products
         return $updated;
     }
 
+    public function getProducts(string $channel) :array
+    {
+        $products = array();
+        $httpCode = 500;
+
+        try {
+            
+            $action = "channels/{$channel}/products?api_token=" . $this->getApiToken();
+            $url = $this->getUrl() . $action; 
+            $header = $this->getHeader();
+            $content = array();
+            $response = $this->sendRequest($url, $header, $content, 'GET');          
+            
+            $httpCode = $response->httpcode ?? 500;            
+            if($httpCode == 200) {               
+                $products = $response->data;
+            }
+            
+        } catch (ThrowException $e) {
+            echo "error ----->" . $e->getMessage();
+        }
+
+        return $products;
+    }
 } // end class
