@@ -4,7 +4,7 @@ namespace astroselling\Jupiter;
 
 class Products
 {
-    protected $version = "Jupiter SDK v1.05";
+    protected $version = "Jupiter SDK v1.06";
     protected $url;
     protected $token;
 
@@ -214,28 +214,83 @@ class Products
         return $updated;
     }
 
-    public function getProducts(string $channel) :array
+    public function getProducts(string $channel, $limit = 500) :array
     {
         $products = array();
+        $empty    = array();
         $httpCode = 500;
+        $error    = false;
 
         try {
-            
-            $action = "channels/{$channel}/products?api_token=" . $this->getApiToken();
-            $url = $this->getUrl() . $action; 
-            $header = $this->getHeader();
-            $content = array();
-            $response = $this->sendRequest($url, $header, $content, 'GET');          
-            
-            $httpCode = $response->httpcode ?? 500;            
-            if($httpCode == 200) {               
-                $products = $response->data;
+            $next   = true;
+            $page   = 1;
+            $offset = 0;
+            while($next) {
+                $action = "channels/{$channel}/products?api_token=" . $this->getApiToken() . "&limit={$limit}&offset={$offset}";
+                $url = $this->getUrl() . $action; 
+                $header = $this->getHeader();
+                $content = array();
+                $begin = date('Y-m-d H:i:s');
+                $response = $this->sendRequest($url, $header, $content, 'GET');          
+
+                $next = false;
+                $httpCode = $response->httpcode ?? 500;            
+                if($httpCode == 200) {               
+                    $products = array_merge($products, $response->data);
+                    $meta = $response->meta_data;
+
+                    // si la cantidad de productos es menor que el tamano de la pagina, estamos en el final ..
+                    if(count($response->data) == $limit) {
+                        
+                        if($meta ) {
+                            $offset = $page * $limit;
+                            $page++;                            
+                            $next = true;                            
+                        }                       
+                    }
+                }
+                else {
+                    $error = true;
+                    echo '[' . $httpCode .']';
+                    break;
+                }                            
             }
             
         } catch (ThrowException $e) {
             echo "error ----->" . $e->getMessage();
         }
 
-        return $products;
+        return ($error ? $empty : $products);
     }
+
+    public function deleteProduct(string $id_in_erp, string $channel) :bool
+    {
+        $deleted = false;
+
+        try {
+            
+            $action = "channels/{$channel}/products/{$id_in_erp}?api_token=" . $this->getApiToken();
+            $url = $this->getUrl() . $action; 
+            $header = $this->getHeader();
+            $content = array();
+            $response = $this->sendRequest($url, $header, $content, 'DELETE');
+            
+            $deleted = ($response->httpcode == 200);
+            
+        } catch (ThrowException $e) {
+            echo "error ----->" . $e->getMessage();
+        }
+
+        return $deleted;
+    }    
+
+    public function elapsedTime(string $begin) : string
+    {
+        $hourEnd   = new \DateTime();
+        $hourBegin = new \DateTime($begin);
+        
+        return $hourEnd->diff($hourBegin)->format("%H:%I:%S");
+    }
+
+
 } // end class
