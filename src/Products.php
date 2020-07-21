@@ -4,9 +4,10 @@ namespace astroselling\Jupiter;
 
 class Products
 {
-    protected $version = "Jupiter SDK v1.06";
+    protected $version = "Jupiter SDK v1.07";
     protected $url;
     protected $token;
+    protected $logPath;
 
     
     /**
@@ -15,10 +16,11 @@ class Products
      * @param string $apiUserName
      * @param string $apiUserKey
      */
-    public function __construct(string $url = '', string $apiToken = '')
+    public function __construct(string $url = '', string $apiToken = '', string $logPath = '')
     {
         $this->url = $url;
         $this->token = $apiToken;
+        $this->logPath = $logPath;
     }
 
 
@@ -126,14 +128,17 @@ class Products
             $header = $this->getHeader();
             $content = array();
             $channels = $this->sendRequest($url, $header, $content, 'GET');
-            
+            print_r($channels);
             $httpCode = $channels->httpcode ?? 500;       
             if($httpCode == 200) {
                 $updated = true;
             }
+            else {
+                $this->saveLog('GET channel', $channels, 'error');
+            }
 
         } catch (ThrowException $e) {
-            $channels = array("error" => $e->getMessage());
+           $this->saveLog('GET channel', $e->getMessage(), 'alert');
         }
 
         return $channels;
@@ -175,9 +180,12 @@ class Products
             if($httpCode == 200) {
                 $updated = true;
             }
+            else {
+                $this->saveLog('CREATE product', $response, 'error');
+            }
             
         } catch (ThrowException $e) {
-            echo "error ----->" . $e->getMessage();
+            $this->saveLog('CREATE product', $e->getMessage(), 'alert');
         }
 
         return $updated;
@@ -201,9 +209,12 @@ class Products
             if($httpCode == 200) {
                 $updated = true;
             }
-            
+            else {
+                $this->saveLog('UPDATE product', $response, 'error');
+            }
+
         } catch (ThrowException $e) {
-            echo "error ----->" . $e->getMessage();
+            $this->saveLog('UPDATE product', $e->getMessage(), 'alert');
         }
 
         // si no existe el producto, lo mando crear ..
@@ -251,13 +262,13 @@ class Products
                 }
                 else {
                     $error = true;
-                    echo '[' . $httpCode .']';
+                    $this->saveLog('GET product', $response, 'error');
                     break;
                 }                            
             }
             
         } catch (ThrowException $e) {
-            echo "error ----->" . $e->getMessage();
+            $this->saveLog('GET product', $e->getMessage(), 'alert');
         }
 
         return ($error ? $empty : $products);
@@ -276,9 +287,12 @@ class Products
             $response = $this->sendRequest($url, $header, $content, 'DELETE');
             
             $deleted = ($response->httpcode == 200);
+            if(!$deleted) {
+                $this->saveLog('DELETE product', $response, 'error');
+            }            
             
         } catch (ThrowException $e) {
-            echo "error ----->" . $e->getMessage();
+            $this->saveLog('DELETE product', $e->getMessage(), 'alert');
         }
 
         return $deleted;
@@ -292,5 +306,25 @@ class Products
         return $hourEnd->diff($hourBegin)->format("%H:%I:%S");
     }
 
+    public function saveLog( $text = "n/a", $obj = null, $level = 'info') :bool
+    {    
+        $text .= " : " . (is_string($obj) ? $obj :json_encode($obj));
+            
+        if(!empty($this->logPath)) {
+           
+            $logger = new \Katzgrau\KLogger\Logger($this->logPath, $level, array (
+                                                        'dateFormat' => 'Y-m-d G:i:s', 
+                                                    ));
+            $level = strtolower($level);
+            
+            $logger->$level($text);
+        }
+        // if no log path, print to screen ..
+        else {
+            echo '<p>' . $text . '</p>';
+        }
+
+        return false;
+    }
 
 } // end class
