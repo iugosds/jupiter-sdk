@@ -4,7 +4,7 @@ namespace astroselling\Jupiter;
 
 class Products
 {
-    protected $version = "Jupiter SDK v1.07";
+    protected $version = "Jupiter SDK v1.08";
     protected $url;
     protected $token;
     protected $logPath;
@@ -128,7 +128,7 @@ class Products
             $header = $this->getHeader();
             $content = array();
             $channels = $this->sendRequest($url, $header, $content, 'GET');
-            print_r($channels);
+            
             $httpCode = $channels->httpcode ?? 500;       
             if($httpCode == 200) {
                 $updated = true;
