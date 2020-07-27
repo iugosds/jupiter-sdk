@@ -4,10 +4,11 @@ namespace astroselling\Jupiter;
 
 class Products
 {
-    protected $version = "Jupiter SDK v1.08";
+    protected $version = "Jupiter SDK v1.09";
     protected $url;
     protected $token;
     protected $logPath;
+    protected $echo;
 
     
     /**
@@ -16,11 +17,12 @@ class Products
      * @param string $apiUserName
      * @param string $apiUserKey
      */
-    public function __construct(string $url = '', string $apiToken = '', string $logPath = '')
+    public function __construct(string $url = '', string $apiToken = '', string $logPath = '', bool $echo = false)
     {
         $this->url = $url;
         $this->token = $apiToken;
         $this->logPath = $logPath;
+        $this->echo = $echo;
     }
 
 
@@ -112,7 +114,8 @@ class Products
 
         return array(
                     "Cache-Control: no-cache",
-                    "Content-Type: application/json"
+                    "Content-Type: application/json",
+                     "Accept: application/json"
                     );
     }
     
