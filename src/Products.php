@@ -4,7 +4,7 @@ namespace astroselling\Jupiter;
 
 class Products
 {
-    protected $version = "Jupiter SDK v1.09";
+    protected $version = "Jupiter SDK v1.10";
     protected $url;
     protected $token;
     protected $logPath;
@@ -58,6 +58,8 @@ class Products
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+        // http 2 support ...
+        curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
 
         if($content) {          
             if(!$xml) {
@@ -74,7 +76,6 @@ class Products
         curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $type);
 
         if($xml) {
-            curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
             curl_setopt($curl, CURLOPT_TIMEOUT, 30);
             curl_setopt($curl, CURLOPT_MAXREDIRS, 10);          
         }
