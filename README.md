@@ -25,9 +25,10 @@ En la página de Astroselling, dentro del módulo "Mi cuenta" -https://nova.astr
 Por cualquier inconveniente, el equipo de soporte está siempre a las órdenes: soporte@astroselling.com
 
 
-## Indices
+## Indice
 
 
+  * [Autenticación](#authentication)
   * [Create Product](#1-create-product)
   * [Delete Product](#2-delete-product)
   * [Get Channel Products](#3-get-channel-products)
@@ -39,7 +40,8 @@ Por cualquier inconveniente, el equipo de soporte está siempre a las órdenes: 
 
 --------
 
-
+### Authentication
+Para consumir los endpoints se requiere autenticarse con un usuario de Astroselling. El token se puede obtener desde https://nova.astroselling.com, ingresando con el usuario correspondiente y luego ingresando a la sección "Mi Cuenta". Desde allí se podrá, además, generar un nuevo token, invalidando inmediatamente el token anterior.
 
 ### 1. Create Product
 
