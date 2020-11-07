@@ -101,14 +101,6 @@ URL: http://nova-back.astroselling.com/jupiter/v1/jupiter/v1/channels/{{CHANNEL_
 
 
 
-***Query params:***
-
-| Key | Value | Description |
-| --- | ------|-------------|
-| api_token | {{API_TOKEN}} |  |
-
-
-
 ***Body:***
 
 ```js        
@@ -195,14 +187,6 @@ URL: http://nova-back.astroselling.com/jupiter/v1/jupiter/v1/channels/{{CHANNEL_
 
 
 
-***Query params:***
-
-| Key | Value | Description |
-| --- | ------|-------------|
-| api_token | {{API_TOKEN}} |  |
-
-
-
 ### 3. Get Channel Products
 
 
@@ -242,7 +226,6 @@ URL: http://nova-back.astroselling.com/jupiter/v1/jupiter/v1/channels/{{CHANNEL_
 
 | Key | Value | Description |
 | --- | ------|-------------|
-| api_token | {{API_TOKEN}} |  |
 | limit | 20 |  |
 | offset | 0 |  |
 
@@ -282,15 +265,6 @@ URL: http://nova-back.astroselling.com/jupiter/v1/jupiter/v1/channels/{{CHANNEL_
 | Accept | application/json |  |
 
 
-
-***Query params:***
-
-| Key | Value | Description |
-| --- | ------|-------------|
-| api_token | {{API_TOKEN}} |  |
-
-
-
 ### 5. Get Channels
 
 
@@ -312,15 +286,6 @@ URL: http://nova-back.astroselling.com/jupiter/v1/jupiter/v1/channels
 | Key | Value | Description |
 | --- | ------|-------------|
 | Accept | application/json |  |
-
-
-
-***Query params:***
-
-| Key | Value | Description |
-| --- | ------|-------------|
-| api_token | {{API_TOKEN}} |  |
-
 
 
 ### 6. Healthcheck
@@ -370,15 +335,6 @@ URL: http://nova-back.astroselling.com/jupiter/v1/jupiter/v1/channels/{{CHANNEL_
 | --- | ------|-------------|
 | Content-Type | application/json |  |
 | Accept | application/json |  |
-
-
-
-***Query params:***
-
-| Key | Value | Description |
-| --- | ------|-------------|
-| api_token | {{API_TOKEN}} |  |
-
 
 
 ***Body:***
