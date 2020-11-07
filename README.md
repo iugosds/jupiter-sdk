@@ -40,8 +40,40 @@ Por cualquier inconveniente, el equipo de soporte está siempre a las órdenes: 
 
 --------
 
-### Authentication
+# Authentication
 Para consumir los endpoints se requiere autenticarse con un usuario de Astroselling. El token se puede obtener desde https://nova.astroselling.com, ingresando con el usuario correspondiente y luego ingresando a la sección "Mi Cuenta". Desde allí se podrá, además, generar un nuevo token, invalidando inmediatamente el token anterior.
+
+Existen dos maneras de enviar el TOKEN para autenticar un request:
+## Autenticación por QueryString:
+
+**Atención: este método es inseguro ya que el TOKEN es enviado en la URL, sin encriptarse.**
+
+En la URL del request, añadir el querystring 
+```&api_token={{api_token}}```
+
+Ejemplo:
+```https://nova.astroselling.com/jupiter/v1/channels?api_token={{api_token}}```
+
+
+## Autenticación por Bearer Token:
+Agregar un header con el nombre "Authentication" y el valor "Bearer {{api_token}}". Ejemplo:
+
+Ejemplo llamado CURL:
+```
+curl --location --request GET 'https://nova.astroselling.com/jupiter/v1/channels' \
+--header 'Accept: application/json' \
+--header 'Authorization: Bearer XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+```
+
+Ejemplo en PHP con cliente Guzzle:
+```
+$response = $client->request('POST', '/api/user', [
+    'headers' => [
+        'Authorization' => 'Bearer '.$token,
+        'Accept' => 'application/json',
+    ],
+]);
+```
 
 ### 1. Create Product
 
