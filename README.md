@@ -363,6 +363,5 @@ URL: http://nova-back.astroselling.com/jupiter/v1/jupiter/v1/channels/{{CHANNEL_
 
 ---
 [Back to top](#astroselling-jupiter---api)
-> Made with &#9829; by [thedevsaddam](https://github.com/thedevsaddam) | Generated at: 2020-09-04 16:19:51 by [docgen](https://github.com/thedevsaddam/docgen)
 
 
