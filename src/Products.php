@@ -75,6 +75,7 @@ class Products
         
         curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $type);
 
+        curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         if($xml) {
             curl_setopt($curl, CURLOPT_TIMEOUT, 30);
             curl_setopt($curl, CURLOPT_MAXREDIRS, 10);          
