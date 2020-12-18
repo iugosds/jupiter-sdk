@@ -20,7 +20,7 @@ Caso sea necesario hacer la integración directamente, usando  otro lenguaje, es
 
 A continuación se podrán observar un conjunto de endpoints para poder integrar productos a Astroselling. En particular, se detallará cómo crear, actualizar y eliminar productos, obtener los canales asociados a un usuario y sus productos respectivos y visualizar el estado de la plataforma.
 
-En la página de Astroselling, dentro del módulo "Mi cuenta" -https://nova.astroselling.com/admin/account- el usuario puede generar su propia API Key para acceder a estos servicios. 
+En la página de Astroselling, dentro del módulo "Mi cuenta" -https://nova.astroselling.com/admin/account- el usuario puede generar su propia API Key para acceder a estos servicios.
 
 Por cualquier inconveniente, el equipo de soporte está siempre a las órdenes: soporte@astroselling.com
 
@@ -48,7 +48,7 @@ Existen dos maneras de enviar el TOKEN para autenticar un request:
 
 **Atención: este método es inseguro ya que el TOKEN es enviado en la URL, sin encriptarse.**
 
-En la URL del request, añadir el querystring 
+En la URL del request, añadir el querystring
 ```&api_token={{api_token}}```
 
 Ejemplo:
@@ -78,7 +78,7 @@ $response = $client->request('POST', '/api/user', [
 ### 1. Create Product
 
 
-Este endpoint se utiliza para dar de alta un producto en Astroselling. En el body del POST se debe de mandar toda la información del producto. 
+Este endpoint se utiliza para dar de alta un producto en Astroselling. En el body del POST se debe de mandar toda la información del producto.
 - Esta información también pueden ser las variaciones.
 
 
@@ -103,7 +103,7 @@ URL: http://nova-back.astroselling.com/jupiter/v1/jupiter/v1/channels/{{CHANNEL_
 
 ***Body:***
 
-```js        
+```js
 {
 	"id_in_erp": "10200240",
 	"sku": "10200240",
@@ -119,6 +119,18 @@ URL: http://nova-back.astroselling.com/jupiter/v1/jupiter/v1/channels/{{CHANNEL_
 			"price": 790,
 			"sku": "10200240 001 06",
 			"title": "Pantalon J\u00fanior",
+			"attributes": [
+				{
+					"id": "attr_id_1",
+					"name": "Color",
+					"value": "Verde"
+					},
+				{
+					"id": "attr_id_1",
+					"name": "Talle",
+					"value": "M"
+				}
+			],
 			"images": [
 				{
 					"path": "http://via.placeholder.com/300/09f/fff.png?text=a"
@@ -137,6 +149,18 @@ URL: http://nova-back.astroselling.com/jupiter/v1/jupiter/v1/channels/{{CHANNEL_
 			"price": 790,
 			"sku": "10200240 002 06",
 			"title": "Pantalon J\u00fanior",
+			"attributes": [
+				{
+					"id": "attr_id_1",
+					"name": "Color",
+					"value": "Verde"
+					},
+				{
+					"id": "attr_id_1",
+					"name": "Talle",
+					"value": "M"
+				}
+			],
 			"images": [
 				{
 					"path": "http://via.placeholder.com/300/09f/fff.png?text=1"
@@ -190,9 +214,9 @@ URL: http://nova-back.astroselling.com/jupiter/v1/jupiter/v1/channels/{{CHANNEL_
 ### 3. Get Channel Products
 
 
-El endpoint en cuestión retorna todos los artículos relacionados a un canal en particular. 
+El endpoint en cuestión retorna todos los artículos relacionados a un canal en particular.
 En particular, veremos los siguientes datos:
-- channel_id 
+- channel_id
 - id_in_erp
 - sku
 - title
@@ -200,8 +224,8 @@ En particular, veremos los siguientes datos:
 - currency
 - stock
 - description
-- extra_info 
-- variations 
+- extra_info
+- variations
 - images
 
 
@@ -209,7 +233,7 @@ En particular, veremos los siguientes datos:
 
 ```bash
 Method: GET
-Type: 
+Type:
 URL: http://nova-back.astroselling.com/jupiter/v1/jupiter/v1/channels/{{CHANNEL_ID}}/products
 ```
 
@@ -234,7 +258,7 @@ URL: http://nova-back.astroselling.com/jupiter/v1/jupiter/v1/channels/{{CHANNEL_
 ### 4. Get Channel Products Info
 
 
-Retorna la información de un canal y producto en particular. 
+Retorna la información de un canal y producto en particular.
 Específicamente retorna los siguientes atributos
 - channel_id
 - id_in_erp
@@ -253,7 +277,7 @@ Específicamente retorna los siguientes atributos
 
 ```bash
 Method: GET
-Type: 
+Type:
 URL: http://nova-back.astroselling.com/jupiter/v1/jupiter/v1/channels/{{CHANNEL_ID}}/products/{{ID_IN_ERP}}
 ```
 
@@ -268,15 +292,15 @@ URL: http://nova-back.astroselling.com/jupiter/v1/jupiter/v1/channels/{{CHANNEL_
 ### 5. Get Channels
 
 
-Entrega una lista de los Canales (con sus respectivos identificadores) que tiene el usuario. A partir de los IDs de la respuesta se podrán ejecutar los próximos endpoints. 
-En particular, retorna el id del Canal, el nombre interno, el método de sincronización (el cual generalmente es "push") y el tipo de Canal. 
+Entrega una lista de los Canales (con sus respectivos identificadores) que tiene el usuario. A partir de los IDs de la respuesta se podrán ejecutar los próximos endpoints.
+En particular, retorna el id del Canal, el nombre interno, el método de sincronización (el cual generalmente es "push") y el tipo de Canal.
 
 
 ***Endpoint:***
 
 ```bash
 Method: GET
-Type: 
+Type:
 URL: http://nova-back.astroselling.com/jupiter/v1/jupiter/v1/channels
 ```
 
@@ -291,7 +315,7 @@ URL: http://nova-back.astroselling.com/jupiter/v1/jupiter/v1/channels
 ### 6. Healthcheck
 
 
-El endpoint en cuestión permite obtener el estado de la plataforma. 
+El endpoint en cuestión permite obtener el estado de la plataforma.
 - Si la API está saludable, retorna un HTTP Code 200.
 
 
@@ -299,7 +323,7 @@ El endpoint en cuestión permite obtener el estado de la plataforma.
 
 ```bash
 Method: GET
-Type: 
+Type:
 URL: http://nova-back.astroselling.com/jupiter/v1/jupiter/v1/healthcheck
 ```
 
@@ -315,8 +339,8 @@ URL: http://nova-back.astroselling.com/jupiter/v1/jupiter/v1/healthcheck
 ### 7. Update Product
 
 
-Este endpoint se utiliza para actualizar la información de un artículo de un canal. Se debe pasar únicamente los atributos que se quieran actualizar. 
-Luego de hacer el PUT, se recibirá como retorno toda la información del producto de Astroselling actualizado. 
+Este endpoint se utiliza para actualizar la información de un artículo de un canal. Se debe pasar únicamente los atributos que se quieran actualizar.
+Luego de hacer el PUT, se recibirá como retorno toda la información del producto de Astroselling actualizado.
 - El atributo imágenes debes ser un arreglo.
 
 
@@ -339,7 +363,7 @@ URL: http://nova-back.astroselling.com/jupiter/v1/jupiter/v1/channels/{{CHANNEL_
 
 ***Body:***
 
-```js        
+```js
 {
 	"price": 103,
 	"stock": 8,
