@@ -87,6 +87,10 @@ class Products
             
         $response = curl_exec($curl);
         $error    = curl_error($curl);
+        $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        if ($httpCode < 200 || $httpCode > 302) {
+            throw new \Exception('Jupiter CURL Exception: ' . $response, $httpCode);
+        }
             
         if($error || !$response) {     
             $result = new \stdClass();       
