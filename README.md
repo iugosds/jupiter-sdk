@@ -46,7 +46,7 @@ Para consumir los endpoints se requiere autenticarse con un usuario de Astrosell
 Existen dos maneras de enviar el TOKEN para autenticar un request:
 ## Autenticación por QueryString:
 
-**Atención: este método es inseguro ya que el TOKEN es enviado en la URL, sin encriptarse.**
+**Atención: este método es inseguro ya que el token es enviado en la URL.
 
 En la URL del request, añadir el querystring
 ```&api_token={{api_token}}```
