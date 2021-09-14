@@ -8,7 +8,7 @@ para instalarlo:
 - composer require astroselling/jupiter-sdk
 
 --------
-En la página de Astroselling, dentro del módulo “Mi cuenta” -https://nova-back.astroselling.com/admin/account- el usuario puede generar su propia API Key para acceder a estos servicios.
+En la página de Astroselling, dentro del módulo “Mi cuenta” -https://nova.astroselling.com/admin/account- el usuario puede generar su propia API Key para acceder a estos servicios.
 
 Por cualquier inconveniente, el equipo de soporte está siempre a las órdenes: soporte@astroselling.com
 --------
@@ -20,7 +20,7 @@ Caso sea necesario hacer la integración directamente, usando  otro lenguaje, es
 
 A continuación se podrán observar un conjunto de endpoints para poder integrar productos a Astroselling. En particular, se detallará cómo crear, actualizar y eliminar productos, obtener los canales asociados a un usuario y sus productos respectivos y visualizar el estado de la plataforma.
 
-En la página de Astroselling, dentro del módulo "Mi cuenta" -https://nova-back.astroselling.com/admin/account- el usuario puede generar su propia API Key para acceder a estos servicios.
+En la página de Astroselling, dentro del módulo "Mi cuenta" -https://nova.astroselling.com/admin/account- el usuario puede generar su propia API Key para acceder a estos servicios.
 
 Por cualquier inconveniente, el equipo de soporte está siempre a las órdenes: soporte@astroselling.com
 
@@ -41,7 +41,7 @@ Por cualquier inconveniente, el equipo de soporte está siempre a las órdenes: 
 --------
 
 # Authentication
-Para consumir los endpoints se requiere autenticarse con un usuario de Astroselling. El token se puede obtener desde https://nova-back.astroselling.com, ingresando con el usuario correspondiente y luego ingresando a la sección "Mi Cuenta". Desde allí se podrá, además, generar un nuevo token, invalidando inmediatamente el token anterior.
+Para consumir los endpoints se requiere autenticarse con un usuario de Astroselling. El token se puede obtener desde https://nova.astroselling.com, ingresando con el usuario correspondiente y luego ingresando a la sección "Mi Cuenta". Desde allí se podrá, además, generar un nuevo token, invalidando inmediatamente el token anterior.
 
 Existen dos maneras de enviar el TOKEN para autenticar un request:
 ## Autenticación por QueryString:
@@ -52,7 +52,7 @@ En la URL del request, añadir el querystring
 ```&api_token={{api_token}}```
 
 Ejemplo:
-```https://nova-back.astroselling.com/jupiter/v1/channels?api_token={{api_token}}```
+```https://nova.astroselling.com/jupiter/v1/channels?api_token={{api_token}}```
 
 
 ## Autenticación por Bearer Token:
@@ -60,7 +60,7 @@ Agregar un header con el nombre "Authentication" y el valor "Bearer {{api_token}
 
 Ejemplo llamado CURL:
 ```
-curl --location --request GET 'https://nova-back.astroselling.com/jupiter/v1/channels' \
+curl --location --request GET 'https://nova.astroselling.com/jupiter/v1/channels' \
 --header 'Accept: application/json' \
 --header 'Authorization: Bearer XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
 ```
@@ -88,7 +88,7 @@ Este endpoint se utiliza para dar de alta un producto en Astroselling. En el bod
 ```bash
 Method: POST
 Type: RAW
-URL: http://nova-back.astroselling.com/jupiter/v1/jupiter/v1/channels/{{CHANNEL_ID}}/products
+URL: http://nova.astroselling.com/jupiter/v1/jupiter/v1/channels/{{CHANNEL_ID}}/products
 ```
 
 
@@ -198,7 +198,7 @@ Este endpoint se utiliza para eliminar un producto de un canal.
 ```bash
 Method: DELETE
 Type: RAW
-URL: http://nova-back.astroselling.com/jupiter/v1/jupiter/v1/channels/{{CHANNEL_ID}}/products/{{ID_IN_ERP}}
+URL: http://nova.astroselling.com/jupiter/v1/jupiter/v1/channels/{{CHANNEL_ID}}/products/{{ID_IN_ERP}}
 ```
 
 
@@ -234,7 +234,7 @@ En particular, veremos los siguientes datos:
 ```bash
 Method: GET
 Type:
-URL: http://nova-back.astroselling.com/jupiter/v1/jupiter/v1/channels/{{CHANNEL_ID}}/products
+URL: http://nova.astroselling.com/jupiter/v1/jupiter/v1/channels/{{CHANNEL_ID}}/products
 ```
 
 
@@ -278,7 +278,7 @@ Específicamente retorna los siguientes atributos
 ```bash
 Method: GET
 Type:
-URL: http://nova-back.astroselling.com/jupiter/v1/jupiter/v1/channels/{{CHANNEL_ID}}/products/{{ID_IN_ERP}}
+URL: http://nova.astroselling.com/jupiter/v1/jupiter/v1/channels/{{CHANNEL_ID}}/products/{{ID_IN_ERP}}
 ```
 
 
@@ -301,7 +301,7 @@ En particular, retorna el id del Canal, el nombre interno, el método de sincron
 ```bash
 Method: GET
 Type:
-URL: http://nova-back.astroselling.com/jupiter/v1/jupiter/v1/channels
+URL: http://nova.astroselling.com/jupiter/v1/jupiter/v1/channels
 ```
 
 
@@ -324,7 +324,7 @@ El endpoint en cuestión permite obtener el estado de la plataforma.
 ```bash
 Method: GET
 Type:
-URL: http://nova-back.astroselling.com/jupiter/v1/jupiter/v1/healthcheck
+URL: http://nova.astroselling.com/jupiter/v1/jupiter/v1/healthcheck
 ```
 
 
@@ -349,7 +349,7 @@ Luego de hacer el PUT, se recibirá como retorno toda la información del produc
 ```bash
 Method: PUT
 Type: RAW
-URL: http://nova-back.astroselling.com/jupiter/v1/jupiter/v1/channels/{{CHANNEL_ID}}/products/{{ID_IN_ERP}}
+URL: http://nova.astroselling.com/jupiter/v1/jupiter/v1/channels/{{CHANNEL_ID}}/products/{{ID_IN_ERP}}
 ```
 
 
@@ -379,7 +379,7 @@ URL: http://nova-back.astroselling.com/jupiter/v1/jupiter/v1/channels/{{CHANNEL_
 
 | Key | Value | Type |
 | --- | ------|-------------|
-| base_url | http://nova-back.astroselling.com/jupiter/v1 |  |
+| base_url | http://nova.astroselling.com/jupiter/v1 |  |
 | api_token | XXXnBeVSIFFyldmxphoZTpYxfaMRm8xtUocYGpeiA4ftEKcXeP8aJif9AZZZ |  |
 | channel_id | 9999 |  |
 
