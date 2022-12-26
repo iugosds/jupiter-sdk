@@ -15,6 +15,7 @@
         "psr-4": {"astroselling\\Jupiter\\": "src/"}
     },
     "require": {
-        "katzgrau/klogger": "dev-master"
+        "katzgrau/klogger": "dev-master",
+        "ext-curl": "*"
     }    
 }
