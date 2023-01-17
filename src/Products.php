@@ -2,6 +2,8 @@
 
 namespace astroselling\Jupiter;
 
+use stdClass;
+
 class Products
 {
     protected $version = "Jupiter SDK v1.11";
@@ -279,7 +281,7 @@ class Products
     public function getProduct(string $channel, $idInErp) :stdClass
     {
         $httpCode = 500;
-        $product = [];
+        $product = new stdClass;
 
         $action = "channels/{$channel}/products/$idInErp/?api_token=" . $this->getApiToken();
         $url = $this->getUrl() . $action;
