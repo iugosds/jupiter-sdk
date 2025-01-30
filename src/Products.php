@@ -49,7 +49,7 @@ class Products
         return $this->token;
     }
 
-    public function sendRequest($url, $header = '', $content = '', $type = 'POST', $xml = false)  :object
+    public function sendRequest($url, $header = '', $content = '', $type = 'POST', $xml = false): stdClass
     {
         ini_set('max_execution_time', 3000);
         ini_set('memory_limit', '1024M');
@@ -129,26 +129,12 @@ class Products
     {
         $channels = array();
 
-        try {
-            $action = "channels?api_token=" . $this->getApiToken();
-            $url = $this->getUrl() . $action;
+        $action = "channels?api_token=" . $this->getApiToken();
+        $url = $this->getUrl() . $action;
 
-            $header = $this->getHeader();
-            $content = array();
-            $channels = $this->sendRequest($url, $header, $content, 'GET');
-
-            $httpCode = $channels->httpcode ?? 500;
-            if ($httpCode == 200) {
-                $updated = true;
-            } else {
-                $this->saveLog('GET channel', $channels, 'error');
-            }
-
-        } catch (ThrowException $e) {
-            $this->saveLog('GET channel', $e->getMessage(), 'alert');
-        }
-
-        return $channels;
+        $header = $this->getHeader();
+        $content = array();
+        return $this->sendRequest($url, $header, $content, 'GET');
     }
 
 
@@ -173,25 +159,16 @@ class Products
     public function createProduct(string $channel, object $product) :bool
     {
         $updated = false;
-        $httpCode = 500;
 
-        try {
+        $action = "channels/{$channel}/products?api_token=" . $this->getApiToken();
+        $url = $this->getUrl() . $action;
+        $header = $this->getHeader();
+        $response = $this->sendRequest($url, $header, $product, 'POST');
 
-            $id_in_channel = $product->id_in_erp;
-            $action = "channels/{$channel}/products?api_token=" . $this->getApiToken();
-            $url = $this->getUrl() . $action;
-            $header = $this->getHeader();
-            $response = $this->sendRequest($url, $header, $product, 'POST');
+        $httpCode = $response->httpcode ?? 500;
 
-            $httpCode = $response->httpcode ?? 500;
-            if ($httpCode == 200) {
-                $updated = true;
-            } else {
-                $this->saveLog('CREATE product', $response, 'error');
-            }
-
-        } catch (ThrowException $e) {
-            $this->saveLog('CREATE product', $e->getMessage(), 'alert');
+        if ($httpCode == 200) {
+            $updated = true;
         }
 
         return $updated;
@@ -201,25 +178,17 @@ class Products
     public function updateProduct(string $channel, object $product) :bool
     {
         $updated = false;
-        $httpCode = 500;
 
-        try {
+        $id_in_channel = $product->id_in_erp;
+        $action = "channels/{$channel}/products/{$id_in_channel}?api_token=" . $this->getApiToken();
+        $url = $this->getUrl() . $action;
+        $header = $this->getHeader();
+        $response = $this->sendRequest($url, $header, $product, 'PUT');
 
-            $id_in_channel = $product->id_in_erp;
-            $action = "channels/{$channel}/products/{$id_in_channel}?api_token=" . $this->getApiToken();
-            $url = $this->getUrl() . $action;
-            $header = $this->getHeader();
-            $response = $this->sendRequest($url, $header, $product, 'PUT');
+        $httpCode = $response->httpcode ?? 500;
 
-            $httpCode = $response->httpcode ?? 500;
-            if ($httpCode == 200) {
-                $updated = true;
-            } else {
-                $this->saveLog('UPDATE product', $response, 'error');
-            }
-
-        } catch (ThrowException $e) {
-            $this->saveLog('UPDATE product', $e->getMessage(), 'alert');
+        if ($httpCode == 200) {
+            $updated = true;
         }
 
         // si no existe el producto, lo mando crear ..
@@ -234,45 +203,39 @@ class Products
     {
         $products = array();
         $empty    = array();
-        $httpCode = 500;
         $error    = false;
 
-        try {
-            $next   = true;
-            $page   = 1;
-            $offset = 0;
-            while ($next) {
-                $action = "channels/{$channel}/products?api_token=" . $this->getApiToken() . "&limit={$limit}&offset={$offset}";
-                $url = $this->getUrl() . $action;
-                $header = $this->getHeader();
-                $content = array();
-                $begin = date('Y-m-d H:i:s');
-                $response = $this->sendRequest($url, $header, $content, 'GET');
+        $next   = true;
+        $page   = 1;
+        $offset = 0;
 
-                $next = false;
-                $httpCode = $response->httpcode ?? 500;
-                
-                if ($httpCode == 200) {
-                    $products = array_merge($products, $response->data);
-                    $meta = $response->meta_data;
+        while ($next) {
+            $action = "channels/{$channel}/products?api_token=" . $this->getApiToken() . "&limit={$limit}&offset={$offset}";
+            $url = $this->getUrl() . $action;
+            $header = $this->getHeader();
+            $content = array();
+            $begin = date('Y-m-d H:i:s');
+            $response = $this->sendRequest($url, $header, $content, 'GET');
 
-                    // si la cantidad de productos es menor que el tamano de la pagina, estamos en el final ..
-                    if (count($response->data) == $limit) {
-                        if ($meta ) {
-                            $offset = $page * $limit;
-                            $page++;
-                            $next = true;
-                        }
+            $next = false;
+            $httpCode = $response->httpcode ?? 500;
+
+            if ($httpCode == 200) {
+                $products = array_merge($products, $response->data);
+                $meta = $response->meta_data;
+
+                // si la cantidad de productos es menor que el tamano de la pagina, estamos en el final ..
+                if (count($response->data) == $limit) {
+                    if ($meta ) {
+                        $offset = $page * $limit;
+                        $page++;
+                        $next = true;
                     }
-                } else {
-                    $error = true;
-                    $this->saveLog('GET product', $response, 'error');
-                    break;
                 }
+            } else {
+                $error = true;
+                break;
             }
-
-        } catch (ThrowException $e) {
-            $this->saveLog('GET product', $e->getMessage(), 'alert');
         }
 
         return ($error ? $empty : $products);
@@ -280,7 +243,6 @@ class Products
 
     public function getProduct(string $channel, $idInErp) :stdClass
     {
-        $httpCode = 500;
         $product = new stdClass;
 
         $action = "channels/{$channel}/products/$idInErp/?api_token=" . $this->getApiToken();
@@ -300,26 +262,13 @@ class Products
 
     public function deleteProduct(string $id_in_erp, string $channel) :bool
     {
-        $deleted = false;
+        $action = "channels/{$channel}/products/{$id_in_erp}?api_token=" . $this->getApiToken();
+        $url = $this->getUrl() . $action;
+        $header = $this->getHeader();
+        $content = array();
+        $response = $this->sendRequest($url, $header, $content, 'DELETE');
 
-        try {
-
-            $action = "channels/{$channel}/products/{$id_in_erp}?api_token=" . $this->getApiToken();
-            $url = $this->getUrl() . $action;
-            $header = $this->getHeader();
-            $content = array();
-            $response = $this->sendRequest($url, $header, $content, 'DELETE');
-
-            $deleted = ($response->httpcode == 200);
-            if (!$deleted) {
-                $this->saveLog('DELETE product', $response, 'error');
-            }
-
-        } catch (ThrowException $e) {
-            $this->saveLog('DELETE product', $e->getMessage(), 'alert');
-        }
-
-        return $deleted;
+        return ($response->httpcode == 200);
     }
 
     public function elapsedTime(string $begin) : string
@@ -329,27 +278,4 @@ class Products
 
         return $hourEnd->diff($hourBegin)->format("%H:%I:%S");
     }
-
-    public function saveLog( $text = "n/a", $obj = null, $level = 'info') :bool
-    {
-        $text .= " : " . (is_string($obj) ? $obj :json_encode($obj));
-
-        if (!empty($this->logPath)) {
-
-            $logger = new \Katzgrau\KLogger\Logger(
-                $this->logPath, $level, array (
-                                                        'dateFormat' => 'Y-m-d G:i:s',
-                )
-            );
-            $level = strtolower($level);
-
-            $logger->$level($text);
-        } else {
-            // if no log path, print to screen ..
-            echo '<p>' . $text . '</p>';
-        }
-
-        return false;
-    }
-
-} // end class
+}
