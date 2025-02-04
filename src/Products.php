@@ -6,50 +6,46 @@ use stdClass;
 
 class Products
 {
-    protected $version = "Jupiter SDK v1.11";
-    protected $url;
-    protected $token;
-    protected $logPath;
-    protected $echo;
+    protected string $version = "Jupiter SDK v1.11";
+    protected string $url;
+    protected string $token;
 
 
     /**
      * Create a new Jupiter API Client with provided API keys
      *
-     * @param string $apiUserName
-     * @param string $apiUserKey
+     * @param string $url
+     * @param string $apiToken
      */
-    public function __construct(string $url = '', string $apiToken = '', string $logPath = '', bool $echo = false)
+    public function __construct(string $url = '', string $apiToken = '')
     {
         $this->url = $url;
         $this->token = $apiToken;
-        $this->logPath = $logPath;
-        $this->echo = $echo;
     }
 
 
     /**
      * Display SDK version
      *
-     * @return void
+     * @return string
      */
-    public function version() :string
+    public function version(): string
     {
         return $this->version;
     }
 
 
-    public function getUrl() :string
+    public function getUrl(): string
     {
         return $this->url;
     }
 
-    public function getApiToken() :string
+    public function getApiToken(): string
     {
         return $this->token;
     }
 
-    public function sendRequest($url, $header = '', $content = '', $type = 'POST', $xml = false): stdClass
+    public function sendRequest(string $url, array $header = null, object $content = null, string $type = 'POST', bool $xml = false): object
     {
         ini_set('max_execution_time', 3000);
         ini_set('memory_limit', '1024M');
@@ -114,7 +110,7 @@ class Products
         return $result;
     }
 
-    public function getHeader() : array
+    public function getHeader(): array
     {
 
         return array(
@@ -125,20 +121,16 @@ class Products
     }
 
 
-    public function getChannels()
+    public function getChannels(): object
     {
-        $channels = array();
-
         $action = "channels?api_token=" . $this->getApiToken();
         $url = $this->getUrl() . $action;
-
         $header = $this->getHeader();
-        $content = array();
-        return $this->sendRequest($url, $header, $content, 'GET');
+        return $this->sendRequest($url, $header, null, 'GET');
     }
 
 
-    public function hasChannel(string $channel) :bool
+    public function hasChannel(string $channel): bool
     {
         $exist = false;
 
@@ -156,7 +148,7 @@ class Products
         return $exist;
     }
 
-    public function createProduct(string $channel, object $product) :bool
+    public function createProduct(string $channel, object $product): bool
     {
         $updated = false;
 
@@ -175,7 +167,7 @@ class Products
     }
 
 
-    public function updateProduct(string $channel, object $product) :bool
+    public function updateProduct(string $channel, object $product): bool
     {
         $updated = false;
 
@@ -199,7 +191,7 @@ class Products
         return $updated;
     }
 
-    public function getProducts(string $channel, $limit = 500) :array
+    public function getProducts(string $channel, int $limit = 500): array
     {
         $products = array();
         $empty    = array();
@@ -213,9 +205,8 @@ class Products
             $action = "channels/{$channel}/products?api_token=" . $this->getApiToken() . "&limit={$limit}&offset={$offset}";
             $url = $this->getUrl() . $action;
             $header = $this->getHeader();
-            $content = array();
-            $begin = date('Y-m-d H:i:s');
-            $response = $this->sendRequest($url, $header, $content, 'GET');
+
+            $response = $this->sendRequest($url, $header, null, 'GET');
 
             $next = false;
             $httpCode = $response->httpcode ?? 500;
@@ -241,16 +232,14 @@ class Products
         return ($error ? $empty : $products);
     }
 
-    public function getProduct(string $channel, $idInErp) :stdClass
+    public function getProduct(string $channel, string $idInErp): object
     {
         $product = new stdClass;
 
         $action = "channels/{$channel}/products/$idInErp/?api_token=" . $this->getApiToken();
         $url = $this->getUrl() . $action;
         $header = $this->getHeader();
-        $content = [];
-        $response = $this->sendRequest($url, $header, $content, 'GET');
-
+        $response = $this->sendRequest($url, $header, null, 'GET');
         $httpCode = $response->httpcode ?? 500;
 
         if ($httpCode == 200) {
@@ -260,22 +249,12 @@ class Products
         return $product;
     }
 
-    public function deleteProduct(string $id_in_erp, string $channel) :bool
+    public function deleteProduct(string $id_in_erp, string $channel): bool
     {
         $action = "channels/{$channel}/products/{$id_in_erp}?api_token=" . $this->getApiToken();
         $url = $this->getUrl() . $action;
         $header = $this->getHeader();
-        $content = array();
-        $response = $this->sendRequest($url, $header, $content, 'DELETE');
-
+        $response = $this->sendRequest($url, $header, null, 'DELETE');
         return ($response->httpcode == 200);
-    }
-
-    public function elapsedTime(string $begin) : string
-    {
-        $hourEnd   = new \DateTime();
-        $hourBegin = new \DateTime($begin);
-
-        return $hourEnd->diff($hourBegin)->format("%H:%I:%S");
     }
 }
