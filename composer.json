@@ -14,7 +14,16 @@
     "autoload": {
         "psr-4": {"astroselling\\Jupiter\\": "src/"}
     },
+    "require-dev": {
+        "pestphp/pest": "^3.7"
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
     "require": {
-        "katzgrau/klogger": "dev-master"
-    }    
+        "php": "^8.2.0",
+        "guzzlehttp/guzzle": "^7.0"
+    }
 }

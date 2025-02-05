@@ -2,157 +2,22 @@
 
 namespace astroselling\Jupiter;
 
+use Psr\Http\Message\ResponseInterface;
 use stdClass;
+use GuzzleHttp\Client;
 
 class Products
 {
-    protected $version = "Jupiter SDK v1.11";
-    protected $url;
-    protected $token;
-    protected $logPath;
-    protected $echo;
+    protected string $token;
+    private Client $client;
 
-
-    /**
-     * Create a new Jupiter API Client with provided API keys
-     *
-     * @param string $apiUserName
-     * @param string $apiUserKey
-     */
-    public function __construct(string $url = '', string $apiToken = '', string $logPath = '', bool $echo = false)
+    public function __construct(string $url = '', string $apiToken = '')
     {
-        $this->url = $url;
         $this->token = $apiToken;
-        $this->logPath = $logPath;
-        $this->echo = $echo;
+        $this->client = new Client(['base_uri' => $url, 'headers' => ['Accept' => 'application/json']]);
     }
 
-
-    /**
-     * Display SDK version
-     *
-     * @return void
-     */
-    public function version() :string
-    {
-        return $this->version;
-    }
-
-
-    public function getUrl() :string
-    {
-        return $this->url;
-    }
-
-    public function getApiToken() :string
-    {
-        return $this->token;
-    }
-
-    public function sendRequest($url, $header = '', $content = '', $type = 'POST', $xml = false)  :object
-    {
-        ini_set('max_execution_time', 3000);
-        ini_set('memory_limit', '1024M');
-
-        $result = new \stdClass();
-
-        $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, $url);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-        // http 2 support ...
-        curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-
-        if ($content) {
-            if (!$xml) {
-                $fields = json_encode($content, JSON_UNESCAPED_UNICODE);
-            } else {
-                curl_setopt($curl, CURLOPT_POST, count($content));
-                $fields = http_build_query($content);
-            }
-
-            curl_setopt($curl, CURLOPT_POSTFIELDS, $fields);
-        }
-
-        curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $type);
-
-        curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-        if ($xml) {
-            curl_setopt($curl, CURLOPT_TIMEOUT, 30);
-            curl_setopt($curl, CURLOPT_MAXREDIRS, 10);
-        }
-
-        if ($header) {
-            curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
-        }
-
-        $response = curl_exec($curl);
-        $error    = curl_error($curl);
-        $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-        if ($httpCode < 200 || $httpCode > 302) {
-            throw new \Exception('Jupiter CURL Exception: ' . $response, $httpCode);
-        }
-
-        if ($error || !$response) {
-            $result = new \stdClass();
-            $result->error = $error;
-        } else {
-            $curlResponse = json_decode($response);
-            //print_r($curlResponse);
-            if (!is_object($curlResponse)) {
-                $result->data = (object) $curlResponse;
-            } else {
-                $result = $curlResponse;
-            }
-        }
-
-        // keep http code
-        $result->httpcode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-
-        curl_close($curl);
-
-        return $result;
-    }
-
-    public function getHeader() : array
-    {
-
-        return array(
-                    "Cache-Control: no-cache",
-                    "Content-Type: application/json",
-                     "Accept: application/json"
-                    );
-    }
-
-
-    public function getChannels()
-    {
-        $channels = array();
-
-        try {
-            $action = "channels?api_token=" . $this->getApiToken();
-            $url = $this->getUrl() . $action;
-
-            $header = $this->getHeader();
-            $content = array();
-            $channels = $this->sendRequest($url, $header, $content, 'GET');
-
-            $httpCode = $channels->httpcode ?? 500;
-            if ($httpCode == 200) {
-                $updated = true;
-            } else {
-                $this->saveLog('GET channel', $channels, 'error');
-            }
-
-        } catch (ThrowException $e) {
-            $this->saveLog('GET channel', $e->getMessage(), 'alert');
-        }
-
-        return $channels;
-    }
-
-
-    public function hasChannel(string $channel) :bool
+    public function hasChannel(string $channel): bool
     {
         $exist = false;
 
@@ -170,186 +35,88 @@ class Products
         return $exist;
     }
 
-    public function createProduct(string $channel, object $product) :bool
+    public function getChannels(): object
     {
-        $updated = false;
-        $httpCode = 500;
-
-        try {
-
-            $id_in_channel = $product->id_in_erp;
-            $action = "channels/{$channel}/products?api_token=" . $this->getApiToken();
-            $url = $this->getUrl() . $action;
-            $header = $this->getHeader();
-            $response = $this->sendRequest($url, $header, $product, 'POST');
-
-            $httpCode = $response->httpcode ?? 500;
-            if ($httpCode == 200) {
-                $updated = true;
-            } else {
-                $this->saveLog('CREATE product', $response, 'error');
-            }
-
-        } catch (ThrowException $e) {
-            $this->saveLog('CREATE product', $e->getMessage(), 'alert');
-        }
-
-        return $updated;
+        $action = "channels?api_token=" . $this->token;
+        $response = $this->client->get($action);
+        return $this->formatResponse($response);
     }
 
-
-    public function updateProduct(string $channel, object $product) :bool
+    public function updateProduct(string $channel, object $product): bool
     {
-        $updated = false;
-        $httpCode = 500;
+        $action = "channels/{$channel}/products/{$product->id_in_erp}?api_token=" . $this->token;
+        $response = $this->client->put($action, ['json' => $product]);
 
-        try {
-
-            $id_in_channel = $product->id_in_erp;
-            $action = "channels/{$channel}/products/{$id_in_channel}?api_token=" . $this->getApiToken();
-            $url = $this->getUrl() . $action;
-            $header = $this->getHeader();
-            $response = $this->sendRequest($url, $header, $product, 'PUT');
-
-            $httpCode = $response->httpcode ?? 500;
-            if ($httpCode == 200) {
-                $updated = true;
-            } else {
-                $this->saveLog('UPDATE product', $response, 'error');
-            }
-
-        } catch (ThrowException $e) {
-            $this->saveLog('UPDATE product', $e->getMessage(), 'alert');
+        if ($response->getStatusCode() == 404) {
+            $this->createProduct($channel, $product);
         }
 
-        // si no existe el producto, lo mando crear ..
-        if ($httpCode == 404) {
-            $updated = $this->createProduct($channel, $product);
-        }
-
-        return $updated;
+        return true;
     }
 
-    public function getProducts(string $channel, $limit = 500) :array
+    public function createProduct(string $channel, object $product): bool
     {
-        $products = array();
-        $empty    = array();
-        $httpCode = 500;
-        $error    = false;
+        $action = "channels/{$channel}/products?api_token=" . $this->token;
+        $this->client->post($action, ['json' => $product]);
+        return true;
+    }
 
-        try {
-            $next   = true;
-            $page   = 1;
-            $offset = 0;
-            while ($next) {
-                $action = "channels/{$channel}/products?api_token=" . $this->getApiToken() . "&limit={$limit}&offset={$offset}";
-                $url = $this->getUrl() . $action;
-                $header = $this->getHeader();
-                $content = array();
-                $begin = date('Y-m-d H:i:s');
-                $response = $this->sendRequest($url, $header, $content, 'GET');
+    public function getProducts(string $channel, int $limit = 500): array
+    {
+        $products = [];
+        $next = true;
+        $page = 1;
+        $offset = 0;
 
-                $next = false;
-                $httpCode = $response->httpcode ?? 500;
-                
-                if ($httpCode == 200) {
-                    $products = array_merge($products, $response->data);
-                    $meta = $response->meta_data;
+        while ($next) {
+            $action = "channels/{$channel}/products?api_token=" . $this->token . "&limit={$limit}&offset={$offset}";
+            $response = $this->client->get($action);
+            $response = $this->formatResponse($response);
+            $next = false;
+            $products = array_merge($products, $response->data);
+            $meta = $response->meta_data;
 
-                    // si la cantidad de productos es menor que el tamano de la pagina, estamos en el final ..
-                    if (count($response->data) == $limit) {
-                        if ($meta ) {
-                            $offset = $page * $limit;
-                            $page++;
-                            $next = true;
-                        }
-                    }
-                } else {
-                    $error = true;
-                    $this->saveLog('GET product', $response, 'error');
-                    break;
+            // si la cantidad de productos es menor que el tamano de la pagina, estamos en el final ..
+            if (count($response->data) == $limit) {
+                if ($meta) {
+                    $offset = $page * $limit;
+                    $page++;
+                    $next = true;
                 }
             }
-
-        } catch (ThrowException $e) {
-            $this->saveLog('GET product', $e->getMessage(), 'alert');
         }
 
-        return ($error ? $empty : $products);
+        return $products;
     }
 
-    public function getProduct(string $channel, $idInErp) :stdClass
+    public function getProduct(string $channel, string $idInErp): object
     {
-        $httpCode = 500;
-        $product = new stdClass;
-
-        $action = "channels/{$channel}/products/$idInErp/?api_token=" . $this->getApiToken();
-        $url = $this->getUrl() . $action;
-        $header = $this->getHeader();
-        $content = [];
-        $response = $this->sendRequest($url, $header, $content, 'GET');
-
-        $httpCode = $response->httpcode ?? 500;
-
-        if ($httpCode == 200) {
-            $product = $response;
-        }
-
-        return $product;
+        $action = "channels/{$channel}/products/$idInErp/?api_token=" . $this->token;
+        $response = $this->client->get($action);
+        return $this->formatResponse($response);
     }
 
-    public function deleteProduct(string $id_in_erp, string $channel) :bool
+    public function deleteProduct(string $id_in_erp, string $channel): bool
     {
-        $deleted = false;
-
-        try {
-
-            $action = "channels/{$channel}/products/{$id_in_erp}?api_token=" . $this->getApiToken();
-            $url = $this->getUrl() . $action;
-            $header = $this->getHeader();
-            $content = array();
-            $response = $this->sendRequest($url, $header, $content, 'DELETE');
-
-            $deleted = ($response->httpcode == 200);
-            if (!$deleted) {
-                $this->saveLog('DELETE product', $response, 'error');
-            }
-
-        } catch (ThrowException $e) {
-            $this->saveLog('DELETE product', $e->getMessage(), 'alert');
-        }
-
-        return $deleted;
+        $action = "channels/{$channel}/products/{$id_in_erp}?api_token=" . $this->token;
+        $this->client->delete($action);
+        return true;
     }
 
-    public function elapsedTime(string $begin) : string
+    private function formatResponse(ResponseInterface $response)
     {
-        $hourEnd   = new \DateTime();
-        $hourBegin = new \DateTime($begin);
+        $result = new stdClass();
+        $responseBody = $response->getBody()->getContents();
+        $decodedResponse = json_decode($responseBody);
 
-        return $hourEnd->diff($hourBegin)->format("%H:%I:%S");
-    }
-
-    public function saveLog( $text = "n/a", $obj = null, $level = 'info') :bool
-    {
-        $text .= " : " . (is_string($obj) ? $obj :json_encode($obj));
-
-        if (!empty($this->logPath)) {
-
-            $logger = new \Katzgrau\KLogger\Logger(
-                $this->logPath, $level, array (
-                                                        'dateFormat' => 'Y-m-d G:i:s',
-                )
-            );
-            $level = strtolower($level);
-
-            $logger->$level($text);
+        if (!is_object($decodedResponse)) {
+            $result->data = (object)$decodedResponse;
         } else {
-            // if no log path, print to screen ..
-            echo '<p>' . $text . '</p>';
+            $result = $decodedResponse;
         }
 
-        return false;
-    }
+        $result->httpcode = $response->getStatusCode();
 
-} // end class
+        return $result;
+    }
+}
