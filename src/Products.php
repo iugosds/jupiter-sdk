@@ -2,6 +2,7 @@
 
 namespace astroselling\Jupiter;
 
+use GuzzleHttp\Exception\GuzzleException;
 use Psr\Http\Message\ResponseInterface;
 use stdClass;
 use GuzzleHttp\Client;
@@ -42,6 +43,9 @@ class Products
         return $this->formatResponse($response);
     }
 
+    /**
+     * @throws GuzzleException
+     */
     public function updateProduct(string $channel, object $product): bool
     {
         $action = "channels/{$channel}/products/{$product->id_in_erp}?api_token=" . $this->token;
@@ -54,6 +58,9 @@ class Products
         return true;
     }
 
+    /**
+     * @throws GuzzleException
+     */
     public function createProduct(string $channel, object $product): bool
     {
         $action = "channels/{$channel}/products?api_token=" . $this->token;
@@ -61,6 +68,9 @@ class Products
         return true;
     }
 
+    /**
+     * @throws GuzzleException
+     */
     public function getProducts(string $channel, int $limit = 500): array
     {
         $products = [];
@@ -89,6 +99,9 @@ class Products
         return $products;
     }
 
+    /**
+     * @throws GuzzleException
+     */
     public function getProduct(string $channel, string $idInErp): object
     {
         $action = "channels/{$channel}/products/$idInErp/?api_token=" . $this->token;
@@ -96,6 +109,9 @@ class Products
         return $this->formatResponse($response);
     }
 
+    /**
+     * @throws GuzzleException
+     */
     public function deleteProduct(string $id_in_erp, string $channel): bool
     {
         $action = "channels/{$channel}/products/{$id_in_erp}?api_token=" . $this->token;
@@ -103,7 +119,7 @@ class Products
         return true;
     }
 
-    private function formatResponse(ResponseInterface $response)
+    private function formatResponse(ResponseInterface $response): object
     {
         $result = new stdClass();
         $responseBody = $response->getBody()->getContents();
