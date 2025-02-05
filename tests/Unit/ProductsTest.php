@@ -1,32 +1,36 @@
 <?php
 
 use astroselling\Jupiter\Products;
-
-test('can initialize products', function () {
-    $products = new Products();
-    expect($products)
-        ->toBeInstanceOf(Products::class)
-        ->and($products->version())->toBeString();
-});
-
-test('can send request', function () {
-    $products = new Products();
-    $url = 'https://api.restful-api.dev/objects';
-
-    $response = $products->sendRequest($url,null, null, 'GET');
-
-    expect($response)->toBeObject();
-});
-
+use GuzzleHttp\Exception\ClientException;
 
 test('getChannels: throw exceptions when unauthenticated', function () {
-    $url = 'https://nova.astroselling.com/jupiter/v1/';
+    $url = 'https://nova.staging.astroselling.com/jupiter/v1/';
 
     $products = new Products($url, 'test');
 
     $products->getChannels();
-})->throws(\Exception::class, 'Unauthenticated');
+})->throws(ClientException::class, 'Unauthorized', 401);
 
+test('Get Channels', function () {
+    $url = 'https://nova.staging.astroselling.com/jupiter/v1/';
+
+    $products = new Products($url, 'vmvlMPhDorWX0pjCRk6XLizh0TcAoKgNkbpgUngHg6aObAI5XtmrTpJWF4M9');
+
+    $res = $products->getChannels();
+
+    expect($res->data)->toBeObject();
+});
+
+test('Get Products', function () {
+    $url = 'https://nova.staging.astroselling.com/jupiter/v1/';
+
+    $products = new Products($url, 'vmvlMPhDorWX0pjCRk6XLizh0TcAoKgNkbpgUngHg6aObAI5XtmrTpJWF4M9');
+    $channelId = $products->getChannels()->data->{1}->id;
+
+    $res = $products->getProducts($channelId, 500);
+
+    expect($res)->toBeArray();
+});
 
 test('createProducts: throw exceptions when unauthenticated', function () {
     $url = 'https://nova.astroselling.com/jupiter/v1/';
@@ -36,7 +40,7 @@ test('createProducts: throw exceptions when unauthenticated', function () {
     $product = new StdClass();
     $products->createProduct('1234', $product);
 
-})->throws(\Exception::class, 'Unauthenticated');
+})->throws(ClientException::class, 'Unauthorized', 401);
 
 test('updateProducts: throw exceptions when unauthenticated', function () {
     $url = 'https://nova.astroselling.com/jupiter/v1/';
@@ -46,7 +50,7 @@ test('updateProducts: throw exceptions when unauthenticated', function () {
     $product = new StdClass();
     $products->createProduct('1234', $product);
 
-})->throws(\Exception::class, 'Unauthenticated');
+})->throws(ClientException::class, 'Unauthorized', 401);
 
 test('getProducts: throw exceptions when unauthenticated', function () {
     $url = 'https://nova.astroselling.com/jupiter/v1/';
@@ -55,7 +59,7 @@ test('getProducts: throw exceptions when unauthenticated', function () {
 
     $products->getProducts('1234');
 
-})->throws(\Exception::class, 'Unauthenticated');
+})->throws(ClientException::class, 'Unauthorized', 401);
 
 test('getProduct: throw exceptions when unauthenticated', function () {
     $url = 'https://nova.astroselling.com/jupiter/v1/';
@@ -64,7 +68,7 @@ test('getProduct: throw exceptions when unauthenticated', function () {
 
     $products->getProduct('1234', '1234');
 
-})->throws(\Exception::class, 'Unauthenticated');
+})->throws(ClientException::class, 'Unauthorized', 401);
 
 test('deleteProduct: throw exceptions when unauthenticated', function () {
     $url = 'https://nova.astroselling.com/jupiter/v1/';
@@ -73,7 +77,7 @@ test('deleteProduct: throw exceptions when unauthenticated', function () {
 
     $products->deleteProduct('1234', '1234');
 
-})->throws(\Exception::class, 'Unauthenticated');
+})->throws(ClientException::class, 'Unauthorized', 401);
 
 describe('test crud operations', function () {
     $url = 'https://nova.staging.astroselling.com/jupiter/v1/';
@@ -89,7 +93,6 @@ describe('test crud operations', function () {
     $fakeProduct->currency = 'USD';
 
     $channelId = $products->getChannels()->data->{1}->id;
-
 
     it('create product', function () use ($products, $fakeProduct, $channelId) {
         $response  = $products->createProduct($channelId, $fakeProduct);
